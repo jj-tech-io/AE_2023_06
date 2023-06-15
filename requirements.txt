@@ -1,0 +1,10 @@
+jupyterlab
+pandas
+matplotlib
+scikit-learn
+keras
+Pillow
+colorspacious
+numpy
+opencv-python
+
