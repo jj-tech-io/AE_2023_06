@@ -15,9 +15,7 @@ ENTRYPOINT ["jupyter", "lab","--ip=0.0.0.0","--allow-root","--no-browser"]
 # docker-compose up
 # #to stop
 # docker-compose down
-
 ##build without cache
 #docker-compose build --no-cache
-
 ##build and run
 #docker-compose up --build
