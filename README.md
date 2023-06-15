@@ -58,7 +58,7 @@ If you'd like to contribute, please fork the repository and use a feature branch
 
 For any major changes, please open an issue first to discuss what you would like to change. Your contributions are appreciated and please remember to give proper attribution. 
 
-If you use the code or parts of this project in your research, kindly cite:
+## If you use the code or parts of this project in your research, kindly cite:
 @misc{johnson2023_AE_2023_06,
 author = {Johnson, Joel},
 title = {AE_2023_06 Project},
