@@ -20,9 +20,6 @@ To run this project, you'll need to install Docker on your machine. Follow the i
 ## Cloning the Repository
 To get a local copy of the repository, simply run:
 git clone https://github.com/username/repository.git
-
-vbnet
-Copy code
 Replace `username` and `repository.git` with the actual username and repository name.
 
 ## Running the Project
