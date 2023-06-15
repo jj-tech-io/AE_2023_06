@@ -26,15 +26,10 @@ Replace `username` and `repository.git` with the actual username and repository 
 Once Docker is installed and the repository is cloned, navigate to the root directory of the project and run the following command to build and start the Docker container:
 docker-compose up --build
 
-arduino
-Copy code
 This command will build a Docker image from the Dockerfile in the project and then start a container from this image. The `-d` flag will run the container in detached mode, allowing you to use the command prompt for other commands.
 
 To stop the Docker container, run:
 docker-compose down
-
-markdown
-Copy code
 
 ## Making Changes
 The project comes with Jupyter notebook files that are set up to auto-reload any changes you make to the Python scripts. To start making changes to the project:
