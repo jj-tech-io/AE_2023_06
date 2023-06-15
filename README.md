@@ -12,7 +12,8 @@ Autoencoder used for manipulating human skin characteristics in real-time.
 - [Contributing](#contributing)
 
 ## Getting Started
-These instructions will guide you on how to get a copy of the project up and running on your local machine for development and testing purposes.
+To run this project, you'll need to install Docker on your machine. Follow the instructions on the [Docker Website](https://docs.docker.com/desktop/install/windows-install/) to download and install Docker.
+
 
 ## Prerequisites
 To run this project, you'll need to install Docker on your machine. Follow the instructions on the Docker website to download and install Docker.
