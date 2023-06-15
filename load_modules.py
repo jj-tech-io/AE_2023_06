@@ -4,6 +4,7 @@ from tensorflow.python.keras.layers import Dense, Flatten, Input
 from tensorflow.python.keras.models import Model, Sequential, load_model, save_model
 from tensorflow.python.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau, LambdaCallback
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 import numpy as np
 import cv2
 import pandas as pd
@@ -24,3 +25,4 @@ import datetime
 # from colorspacious import cspace_convert
 from tensorflow.keras.layers import Lambda, BatchNormalization
 from tensorflow.python.client import device_lib
+CMAP_SPECULAR = 'viridis'
