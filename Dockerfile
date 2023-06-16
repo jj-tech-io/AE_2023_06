@@ -8,14 +8,22 @@ COPY . .
 EXPOSE 8888
 ENTRYPOINT ["jupyter", "lab","--ip=0.0.0.0","--allow-root","--no-browser"]
 #run in vscode terminal
-# CMD ["jupyter", "lab","--ip=-0,0,0,0","--allow-root","--no-browser"]
-# #to build
-# docker build .
-# #to run
-# docker-compose up
+#CMD ["jupyter", "lab","--ip=-0,0,0,0","--allow-root","--no-browser"]
+##to build
+#docker build .
+
+##to run
+#docker-compose up
+
 # #to stop
 # docker-compose down
+
 ##build without cache
 #docker-compose build --no-cache
+
 ##build and run
 #docker-compose up --build
+
+##build and run with tags (latest-gpu)
+#docker build -t latest-gpu .
+#docker run -p 8888:8888 latest-gpu

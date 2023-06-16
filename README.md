@@ -61,10 +61,10 @@ For any major changes, please open an issue first to discuss what you would like
 
 ## If you use the code or parts of this project in your research, kindly cite:
 @misc{johnson2023_AE_2023_06,
-author = {Johnson, Joel},
-title = {AE_2023_06 Project},
-year = {2023},
-publisher = {GitHub},
-journal = {GitHub Repository},
-howpublished = {\url{https://github.com/username/repository}}
+    author = {Johnson, Joel},
+    title = {AE_2023_06 Project},
+    year = {2023},
+    publisher = {GitHub},
+    journal = {GitHub Repository},
+    howpublished = {\url{https://github.com/username/repository}}
 }

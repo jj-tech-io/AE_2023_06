@@ -1,4 +1,5 @@
 jupyterlab
+ipykernel
 pandas
 matplotlib
 scikit-learn
@@ -7,4 +8,6 @@ Pillow
 colorspacious
 numpy
 opencv-python
-
+json5
+keras
+tensorflow
