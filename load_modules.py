@@ -24,9 +24,9 @@ import tensorflow.python.keras.backend as K
 from tensorflow.python.client import device_lib
 import os 
 import datetime
-# from tensorflow.keras.layers import Lambda, BatchNormalization
-# from tensorflow.python.client import device_lib
+from tensorflow.keras.layers import Lambda, BatchNormalization
+from tensorflow.python.client import device_lib
 import colorspacious
 from datetime import datetime
 from time import time
-CMAP_SPECULAR = 'viridis'
+
