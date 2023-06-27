@@ -15,6 +15,7 @@ else:
     # ENCODER_PATH = r"/AE_2023_06/TrainedModels/316/encoder.h5"  
     # DECODER_PATH = r"/AE_2023_06/TrainedModels/316/decoder.h5"
     #TrainedModels\no_duplicates_75_2_mask\encoder.h5
+    #TrainedModels/no_duplicates_75_2_mask/encoder.h5
     ENCODER_PATH = r"/AE_2023_06/TrainedModels/no_duplicates_75_2_mask/encoder.h5"
     DECODER_PATH = r"/AE_2023_06/TrainedModels/no_duplicates_75_2_mask/decoder.h5"
     

@@ -11,3 +11,4 @@ opencv-python
 json5
 keras
 tensorflow
+jupyter_ai
