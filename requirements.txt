@@ -1,4 +1,3 @@
-jupyterlab
 ipykernel
 pandas
 matplotlib
@@ -9,6 +8,5 @@ colorspacious
 numpy
 opencv-python
 json5
-keras
 tensorflow
-jupyter_ai
+jupyter-lab
