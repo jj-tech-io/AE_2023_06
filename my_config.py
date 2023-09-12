@@ -5,10 +5,15 @@ IMAGE_FOLDER = None
 ENCODER_PATH = None
 DECODER_PATH = None
 if RUN_LOCAL:
-    IMAGE_FOLDER = r"models_4k"
-    ENCODER_PATH = r"C:\Users\joeli\OneDrive\Desktop\AE_2023_06\TrainedModels\no_duplicates_75_2_mask\encoder.h5"
-    DECODER_PATH = r"C:\Users\joeli\OneDrive\Desktop\AE_2023_06\TrainedModels\no_duplicates_75_2_mask\decoder.h5"
+    # IMAGE_FOLDER = r"models_4k"
+    IMAGE_FOLDER = r"C:\Users\joeli\Dropbox\AE_MC\AE_InputModels\test"
+    #"C:\Users\joeli\Dropbox\AE_MC\saved_ml_models\SmallBatchSize\decoder_19_05.h5"
+    DECODER_PATH = r"C:\Users\joeli\Dropbox\AE_MC\saved_ml_models\SmallBatchSize\decoder_19_05.h5"
+    ENCODER_PATH = r"C:\Users\joeli\Dropbox\AE_MC\saved_ml_models\SmallBatchSize\encoder_19_05.h5"
+    # ENCODER_PATH = r"C:\Users\joeli\OneDrive\Desktop\AE_2023_06\TrainedModels\no_duplicates_75_2_mask\encoder.h5"
+    # DECODER_PATH = r"C:\Users\joeli\OneDrive\Desktop\AE_2023_06\TrainedModels\no_duplicates_75_2_mask\decoder.h5"
     # "C:\Users\joeli\OneDrive\Desktop\AE_2023_06\TrainedModels\no_duplicates_75_2_mask\no_duplicates_75_2_maskdecoder.h5"
+
 
 else:
     IMAGE_FOLDER = r"models_4k"
