@@ -1,5 +1,10 @@
 .pb*
 .csv*
+!C:\Users\joeli\Dropbox\Code\AE_2023_06\LUTs\output_spectral.csv
+!C:\Users\joeli\Dropbox\Code\AE_2023_06\LUTs\output_spectral_large.csv
+!C:\Users\joeli\Dropbox\Code\AE_2023_06\LUTs\output_spectral_med.csv
+!C:\Users\joeli\Dropbox\Code\AE_2023_06\LUTs\output_spectral_small.csv
+
 .png*
 .jpg*
 
