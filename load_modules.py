@@ -41,7 +41,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os 
 import datetime
 import colorspacious
-from time import time
+import time
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras.layers import Dense, Flatten, Input
