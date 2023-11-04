@@ -18,14 +18,17 @@ def PLOT_TEX_MAPS(target, parameter_maps, title=None, save = False, text_below =
     plt.style.use('dark_background')
     #no grid
     plt.rcParams['axes.grid'] = False
+    WIDTH, HEIGHT = target.shape[:2]
     if parameter_maps.ndim == 2 and parameter_maps.shape[1] == NUM_CHANNELS:
         WIDTH = int(np.sqrt(parameter_maps.shape[0]))
         HEIGHT = WIDTH
         parameter_maps = parameter_maps.reshape(WIDTH, HEIGHT, NUM_CHANNELS)
+
     elif parameter_maps.ndim == 3 and parameter_maps.shape[2] == NUM_CHANNELS:
         WIDTH, HEIGHT = parameter_maps.shape[:2]
+        parameter_maps = parameter_maps.reshape(WIDTH, HEIGHT, NUM_CHANNELS)
     else:
-        raise ValueError("parameter_maps must have a shape of (-1, 5) or (WIDTH, HEIGHT, 5)")
+        raise ValueError("Parameter maps must be of shape (N, 5) or (W, H, 5).")
 
     labels = ["Original", "Cm", "Ch", "Bm", "Bh", "T"]
     name = f"tex_maps_{title}.png" if title else "tex_maps.png"
@@ -38,14 +41,10 @@ def PLOT_TEX_MAPS(target, parameter_maps, title=None, save = False, text_below =
     for i in range(NUM_CHANNELS):
         width_ratios.append(1)
         width_ratios.append(0.01)
-
-
     gs = GridSpec(1, len(width_ratios), width_ratios=width_ratios, wspace=0.3)
-
-
-
     # Display the original/target image
     ax0 = fig.add_subplot(gs[0, 0])
+    target.reshape(WIDTH, HEIGHT, 3)
     ax0.imshow(target)
     ax0.axis('off')
     ax0.set_title(labels[0])
@@ -67,10 +66,7 @@ def PLOT_TEX_MAPS(target, parameter_maps, title=None, save = False, text_below =
         cbar = fig.colorbar(im, cax=cbar_ax, orientation='vertical',pad=0.15)
         #remove outline from colorbar
         cbar.outline.set_visible(False)
-
-
     plt.subplots_adjust(wspace=0.4,hspace=0.0)
-
     plt.suptitle(title, fontsize=16)
     #add text below  plots
     if text_below is not None:
