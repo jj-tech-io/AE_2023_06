@@ -6,6 +6,9 @@ import skimage
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import face_mesh as mp_face_mesh
 import matplotlib.pyplot as plt
+import numpy as np
+import cv2
+from scipy.spatial import Delaunay
 
 from .lm_data import FACE_OVAL
 
@@ -44,6 +47,12 @@ def warp_image(source, target, landmarks1, landmarks2):
         src_rect = cv2.boundingRect(np.float32([src_triangle]))
         dest_rect = cv2.boundingRect(np.float32([dest_triangle]))
 
+        # Check if the bounding box has non-positive width or height, and skip if it does
+        if src_rect[2] <= 0 or src_rect[3] <= 0 or dest_rect[2] <= 0 or dest_rect[3] <= 0:
+            # Optionally log the problematic triangle information here
+            print(f"Skipping triangle with src_rect: {src_rect} or dest_rect: {dest_rect}")
+            continue
+
         # Crop the triangle from the source and destination images
         src_cropped_triangle = source[src_rect[1]:src_rect[1] + src_rect[3], src_rect[0]:src_rect[0] + src_rect[2]]
         dest_cropped_triangle = np.zeros((dest_rect[3], dest_rect[2], 3), dtype=np.float32)
@@ -62,14 +71,90 @@ def warp_image(source, target, landmarks1, landmarks2):
         mask = np.zeros((dest_rect[3], dest_rect[2]), dtype=np.uint8)
         cv2.fillConvexPoly(mask, np.int32(dest_triangle_adjusted), (1, 1, 1), 16, 0)
 
-        # Place the warped triangle in the destination image
-        warped_image[dest_rect[1]:dest_rect[1] + dest_rect[3], dest_rect[0]:dest_rect[0] + dest_rect[2]] = \
-            warped_image[dest_rect[1]:dest_rect[1] + dest_rect[3], dest_rect[0]:dest_rect[0] + dest_rect[2]] * (1 - mask[:, :, None]) \
-            + warped_triangle * mask[:, :, None]
-    return warped_image.astype(np.uint8)
+        dest_img_patch = warped_image[dest_rect[1]:dest_rect[1] + dest_rect[3], dest_rect[0]:dest_rect[0] + dest_rect[2]]
 
+        # Resize or slice the warped_triangle and mask if necessary to fit the destination patch
+        if warped_triangle.shape[:2] != dest_img_patch.shape[:2]:
+            warped_triangle = cv2.resize(warped_triangle, (dest_img_patch.shape[1], dest_img_patch.shape[0]), interpolation=cv2.INTER_LINEAR)
+            mask = cv2.resize(mask, (dest_img_patch.shape[1], dest_img_patch.shape[0]), interpolation=cv2.INTER_NEAREST)
+
+        # Now the shapes should match, and you can proceed with the operation
+        dest_img_patch *= (1 - mask[:, :, None])
+        dest_img_patch += warped_triangle * mask[:, :, None]
+
+        # Place the modified patch back into the image
+        warped_image[dest_rect[1]:dest_rect[1] + dest_rect[3], dest_rect[0]:dest_rect[0] + dest_rect[2]] = dest_img_patch
+
+
+    return warped_image.astype(np.uint8)
+def warp_image_single_channel(source, target, landmarks1, landmarks2):
+    # Compute Delaunay Triangulation
+    delaunay = Delaunay(landmarks1)
+    
+    num_channels = source.shape[2] if len(source.shape) > 2 else 1
+    warped_image = np.zeros_like(target if num_channels == 3 else target[:,:,None])  # Adjust for 1 or 3 channels
+    
+    # Iterate through each triangle in the triangulation
+    for simplex in delaunay.simplices:
+        # Get the vertices of the triangle in both images
+        src_triangle = landmarks1[simplex]
+        dest_triangle = landmarks2[simplex]
+
+        # Compute the bounding box of the triangle in both images
+        src_rect = cv2.boundingRect(np.float32([src_triangle]))
+        dest_rect = cv2.boundingRect(np.float32([dest_triangle]))
+
+        # Crop the triangle from the source and destination images
+        src_cropped_triangle = source[src_rect[1]:src_rect[1] + src_rect[3], src_rect[0]:src_rect[0] + src_rect[2]]
+        dest_cropped_triangle = np.zeros((dest_rect[3], dest_rect[2], num_channels), dtype=source.dtype)
+
+        # Adjust coordinates to the cropped region
+        src_triangle_adjusted = src_triangle - (src_rect[0], src_rect[1])
+        dest_triangle_adjusted = dest_triangle - (dest_rect[0], dest_rect[1])
+
+        # Compute the affine transformation
+        matrix = cv2.getAffineTransform(np.float32(src_triangle_adjusted), np.float32(dest_triangle_adjusted))
+
+        # Warp the source triangle to the shape of the destination triangle
+        warped_triangle = cv2.warpAffine(src_cropped_triangle, matrix, (dest_rect[2], dest_rect[3]), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+
+        # Mask for the destination triangle
+        mask = np.zeros((dest_rect[3], dest_rect[2]), dtype=np.uint8)
+        cv2.fillConvexPoly(mask, np.int32(dest_triangle_adjusted), 1, 16)
+
+        # Place the warped triangle in the destination image
+        if num_channels == 3:
+            # For a 3-channel image, use stacking of the mask
+            mask_stack = mask[:, :, None]
+            warped_image[dest_rect[1]:dest_rect[1]+dest_rect[3], dest_rect[0]:dest_rect[0]+dest_rect[2]] *= (1 - mask_stack)
+            warped_image[dest_rect[1]:dest_rect[1]+dest_rect[3], dest_rect[0]:dest_rect[0]+dest_rect[2]] += warped_triangle * mask_stack
+        else:
+            # For a 1-channel image, ensure the warped_triangle is indeed single-channel
+            if warped_triangle.ndim > 2:
+                warped_triangle = warped_triangle[:, :, 0]  # Extract the single-channel if necessary
+                    # Inside the warp_image_single_channel function, before the operation that causes the error:
+    if warped_triangle.ndim > 2:
+        # This will squeeze singleton dimensions from the array.
+        warped_triangle = np.squeeze(warped_triangle)
+
+        # Now perform the operation with the corrected shapes.
+        if warped_triangle.shape[:2] == mask.shape:
+            # Ensure the shapes are compatible for broadcasting.
+            warped_image[dest_rect[1]:dest_rect[1]+dest_rect[3], dest_rect[0]:dest_rect[0]+dest_rect[2]] *= (1 - mask)
+            warped_image[dest_rect[1]:dest_rect[1]+dest_rect[3], dest_rect[0]:dest_rect[0]+dest_rect[2]] += warped_triangle * mask
+        else:
+            # Raise an error or handle the mismatch in shapes appropriately.
+            raise ValueError("Shape of warped_triangle and mask do not match.")
+
+        warped_image[dest_rect[1]:dest_rect[1]+dest_rect[3], dest_rect[0]:dest_rect[0]+dest_rect[2]] *= (1 - mask)
+        warped_image[dest_rect[1]:dest_rect[1]+dest_rect[3], dest_rect[0]:dest_rect[0]+dest_rect[2]] += warped_triangle * mask
+
+    return warped_image if num_channels == 3 else warped_image[:,:,0]
 
 def crop_face(image):
+    # If the image has more than 3 channels, take only the first three
+    if image.shape[2] > 3:
+        image = image[:, :, :3]
     image = image.astype(np.float32)
     landmarks = get_landmarks(image)
     
@@ -86,7 +171,7 @@ def crop_face(image):
     
     # Find the bounding rectangle around the face
     x, y, w, h = cv2.boundingRect(mask)
-    w = h = max(w, h)
+    w = h = min(w, h)
     bounding_box = np.array([x, y, h, h])
     # Crop the image based on this rectangle
     cropped_face = image[y:y+h, x:x+h]
@@ -208,3 +293,70 @@ def get_light_spectra():
     blackbody_normalized = blackbody_contrib / np.linalg.norm(blackbody_contrib)
     print(blackbody_normalized)
     return blackbody_normalized
+
+def add_thickness_as_alpha(rgb_image_path):
+    # Hardcoded paths for thickness map and model image
+    thickness_map_path = r"C:\Desktop\m104_thickness_map.png"
+    model_path = r"C:\Users\joeli\Dropbox\Data\models_4k\m53_4k.png"
+    
+    # Read and process the thickness map
+    thickness = cv2.imread(thickness_map_path, cv2.IMREAD_GRAYSCALE)
+    thickness = cv2.resize(thickness, (1024, 1024))
+    
+    # Read and process the model image
+    model = cv2.imread(model_path)
+    model = cv2.cvtColor(model, cv2.COLOR_BGR2RGB)
+    model = cv2.resize(model, (1024, 1024))
+    
+    # Read and process the RGB image
+    rgb_data = cv2.imread(rgb_image_path)
+    rgb_data = cv2.cvtColor(rgb_data, cv2.COLOR_BGR2RGB)
+    rgb_data = cv2.resize(rgb_data, (1024, 1024))
+    
+    # Get landmarks
+    landmarks_model = get_landmarks(model)
+    landmarks_rgb = get_landmarks(rgb_data)
+    
+    # Warp the model image to match the RGB image
+    warped_model = warp_image(model, rgb_data, landmarks_model, landmarks_rgb)
+    warped_model, bounding_box = crop_face(warped_model)
+    
+    # Prepare the thickness map
+    thickness_3_channel = np.stack((thickness,)*3, axis=-1)
+    warped_thickness_3_channel = warp_image(thickness_3_channel, rgb_data, landmarks_model, landmarks_rgb)
+    warped_thickness = warped_thickness_3_channel[bounding_box[1]:bounding_box[1]+bounding_box[3], bounding_box[0]:bounding_box[0]+bounding_box[2], 0]
+    
+    # Normalize the thickness map and add as alpha channel
+    warped_thickness = (warped_thickness - np.min(warped_thickness)) / (np.max(warped_thickness) - np.min(warped_thickness))
+    thickness_alpha = (warped_thickness * 0.2 + 0.01) * 255
+    thickness_alpha = thickness_alpha.astype(np.uint8)
+    
+    # Crop the RGB image to match the warped model
+    rgb_cropped = rgb_data[bounding_box[1]:bounding_box[1]+bounding_box[3], bounding_box[0]:bounding_box[0]+bounding_box[2]]
+    
+    # Combine the RGB image with the thickness map as alpha channel
+    rgba_image = np.dstack((rgb_cropped, thickness_alpha))
+    #where rgba_image = 0 set to random gaussian noise
+    black_pixels_mask = (rgba_image[:, :, 0] == 0) & (rgba_image[:, :, 1] == 0) & (rgba_image[:, :, 2] == 0)
+    mean_value = np.mean(rgba_image[black_pixels_mask, 0])
+    std_deviation = np.std(rgba_image[black_pixels_mask, 0])
+    print(mean_value, std_deviation)
+    # Generate Gaussian noise for each RGB channel where the black_pixels_mask is True
+    # The same mask applies for the thickness map
+    noise_r = np.random.normal(mean_value, std_deviation, rgba_image.shape[:2])
+    noise_g = np.random.normal(mean_value, std_deviation, rgba_image.shape[:2])
+    noise_b = np.random.normal(mean_value, std_deviation, rgba_image.shape[:2])
+    noise_thickness = np.random.normal(mean_value, std_deviation, rgba_image.shape[:2])
+
+    # Assign the Gaussian noise to the RGB channels where the mask is True
+    rgba_image[black_pixels_mask, 0] = noise_r[black_pixels_mask]
+    rgba_image[black_pixels_mask, 1] = noise_g[black_pixels_mask]
+    rgba_image[black_pixels_mask, 2] = noise_b[black_pixels_mask]
+    # rgba_image[black_pixels_mask, 3] = noise_thickness[black_pixels_mask]
+    warped_thickness[black_pixels_mask] = noise_thickness[black_pixels_mask]
+    #gaussian blur
+    rgba_image = cv2.GaussianBlur(rgba_image,(5,5),0)
+    # Save the RGBA image
+    cv2.imwrite("rgb_thickness_alpha.png", cv2.cvtColor(rgba_image, cv2.COLOR_RGBA2BGRA))
+    #fill the black with gaussian blur of mean value
+    return rgba_image, warped_thickness
