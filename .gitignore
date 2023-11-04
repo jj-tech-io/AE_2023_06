@@ -1,10 +1,7 @@
 .pb*
 .csv*
-!C:\Users\joeli\Dropbox\Code\AE_2023_06\LUTs\output_spectral.csv
-
 .png*
 .jpg*
-
 
 *.pyc
 weights_biases/w6.csv
