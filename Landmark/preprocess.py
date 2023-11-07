@@ -336,27 +336,8 @@ def add_thickness_as_alpha(rgb_image_path):
     
     # Combine the RGB image with the thickness map as alpha channel
     rgba_image = np.dstack((rgb_cropped, thickness_alpha))
-    #where rgba_image = 0 set to random gaussian noise
-    black_pixels_mask = (rgba_image[:, :, 0] == 0) & (rgba_image[:, :, 1] == 0) & (rgba_image[:, :, 2] == 0)
-    mean_value = np.mean(rgba_image[black_pixels_mask, 0])
-    std_deviation = np.std(rgba_image[black_pixels_mask, 0])
-    print(mean_value, std_deviation)
-    # Generate Gaussian noise for each RGB channel where the black_pixels_mask is True
-    # The same mask applies for the thickness map
-    noise_r = np.random.normal(mean_value, std_deviation, rgba_image.shape[:2])
-    noise_g = np.random.normal(mean_value, std_deviation, rgba_image.shape[:2])
-    noise_b = np.random.normal(mean_value, std_deviation, rgba_image.shape[:2])
-    noise_thickness = np.random.normal(mean_value, std_deviation, rgba_image.shape[:2])
 
-    # Assign the Gaussian noise to the RGB channels where the mask is True
-    rgba_image[black_pixels_mask, 0] = noise_r[black_pixels_mask]
-    rgba_image[black_pixels_mask, 1] = noise_g[black_pixels_mask]
-    rgba_image[black_pixels_mask, 2] = noise_b[black_pixels_mask]
-    # rgba_image[black_pixels_mask, 3] = noise_thickness[black_pixels_mask]
-    warped_thickness[black_pixels_mask] = noise_thickness[black_pixels_mask]
-    #gaussian blur
-    rgba_image = cv2.GaussianBlur(rgba_image,(5,5),0)
     # Save the RGBA image
     cv2.imwrite("rgb_thickness_alpha.png", cv2.cvtColor(rgba_image, cv2.COLOR_RGBA2BGRA))
-    #fill the black with gaussian blur of mean value
+    
     return rgba_image, warped_thickness
