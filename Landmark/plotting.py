@@ -77,5 +77,5 @@ def PLOT_TEX_MAPS(target, parameter_maps, title=None, save = False, text_below =
         #lower!!
         plt.figtext(0.5, 0.01, text_below, wrap=True, horizontalalignment='center',  verticalalignment='bottom', fontsize=10)
         # plt.figtext( arg names )
-    plt.savefig(name, dpi=600, transparent=True, bbox_inches='tight')
+    plt.savefig(name, dpi=100, transparent=True, bbox_inches='tight')
     plt.show()
